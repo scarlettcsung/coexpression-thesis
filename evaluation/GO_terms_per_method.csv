@@ -1,0 +1,93 @@
+Description,Original,CLR,propr,propr_z,MeanResiduals,PC1Residuals,method_sum
+DNA-templated DNA replication,1,0,0,0,0,0,1
+single-species biofilm formation,1,1,1,0,0,0,3
+aerobic electron transport chain,1,0,0,1,0,0,2
+propionate metabolic process,1,0,0,0,0,0,1
+cytoplasmic translation,1,1,1,1,1,1,6
+DNA transposition,1,0,0,0,1,0,2
+response to temperature stimulus,1,0,1,0,1,1,4
+anaerobic respiration,1,1,1,1,1,1,6
+response to heat,1,0,0,0,1,0,2
+aspartate family amino acid biosynthetic process,1,0,0,0,0,0,1
+monocarboxylic acid catabolic process,1,1,0,1,1,1,5
+membraneless organelle assembly,1,1,0,1,0,0,3
+secondary metabolite biosynthetic process,1,0,0,0,0,0,1
+response to pH,1,0,1,1,1,0,4
+tRNA aminoacylation for protein translation,1,1,1,0,0,0,3
+lipopolysaccharide metabolic process,1,0,0,0,0,0,1
+L-amino acid biosynthetic process,1,1,0,1,0,0,3
+proteinogenic amino acid biosynthetic process,1,1,0,1,0,0,3
+respiratory electron transport chain,1,0,0,0,0,0,1
+SOS response,1,0,0,0,0,0,1
+putrescine catabolic process,1,0,1,0,0,0,2
+L-amino acid metabolic process,1,1,0,0,1,1,4
+proteinogenic amino acid metabolic process,1,1,0,0,1,1,4
+hexose metabolic process,1,0,0,0,0,0,1
+monosaccharide transmembrane transport,1,0,0,0,1,0,2
+nucleotide biosynthetic process,1,0,0,0,0,0,1
+organic acid transmembrane transport,1,0,0,0,0,0,1
+transition metal ion transport,1,0,0,0,0,1,2
+thiamine diphosphate biosynthetic process,0,1,1,0,1,0,3
+non-proteinogenic amino acid metabolic process,0,1,1,1,1,1,5
+L-amino acid catabolic process,0,1,0,0,1,0,2
+glucose catabolic process,0,1,0,0,1,0,2
+alpha-amino acid metabolic process,0,0,0,0,1,0,1
+bacterial-type flagellum-dependent cell motility,0,1,1,0,1,0,3
+biofilm formation,0,1,1,1,1,1,5
+aerobic respiration,0,0,1,1,1,1,4
+peptidoglycan metabolic process,0,0,0,0,1,0,1
+L-arginine biosynthetic process,0,0,0,0,1,0,1
+response to copper ion,0,1,0,0,1,0,2
+ribonucleoside triphosphate biosynthetic process,0,0,0,0,1,0,1
+lipopolysaccharide biosynthetic process,0,1,1,0,1,1,4
+amino acid biosynthetic process,0,0,0,1,1,0,2
+response to osmotic stress,0,0,1,0,1,1,3
+glycerol metabolic process,0,0,0,0,1,0,1
+iron import into cell,0,0,1,0,1,0,2
+submerged biofilm formation,0,0,0,0,1,0,1
+pyrimidine ribonucleotide biosynthetic process,0,0,0,0,1,0,1
+phosphate ion transmembrane transport,0,0,0,0,1,0,1
+regulation of growth,0,1,1,1,1,0,4
+quorum sensing,0,0,0,0,1,0,1
+cell motility,0,0,0,0,0,1,1
+cytochrome complex assembly,0,0,0,0,0,1,1
+anaerobic electron transport chain,0,1,1,1,0,1,4
+clearance of foreign intracellular nucleic acids,0,0,0,0,0,1,1
+alpha-amino acid biosynthetic process,0,0,0,0,0,1,1
+'de novo' IMP biosynthetic process,0,1,0,1,0,1,3
+methionine biosynthetic process,0,1,0,0,0,1,2
+DNA metabolic process,0,0,0,0,0,1,1
+aromatic amino acid family biosynthetic process,0,0,0,0,0,1,1
+organic cation transport,0,0,0,0,0,1,1
+ribose phosphate biosynthetic process,0,0,0,1,0,1,2
+siderophore metabolic process,0,0,0,1,0,1,2
+phosphoenolpyruvate-dependent sugar phosphotransferase system,0,0,0,0,0,1,1
+cell wall organization,0,1,0,0,0,0,1
+organophosphate biosynthetic process,0,1,0,0,0,0,1
+xenobiotic catabolic process,0,1,0,0,0,0,1
+iron ion transport,0,1,1,0,0,0,2
+dipeptide transport,0,1,0,0,0,0,1
+small molecule biosynthetic process,0,1,0,0,0,0,1
+rRNA processing,0,1,0,0,0,0,1
+iron-sulfur cluster assembly,0,1,0,0,0,0,1
+translation,0,1,0,0,0,0,1
+carboxylic acid transmembrane transport,0,1,0,0,0,0,1
+ribosome biogenesis,0,1,0,0,0,0,1
+monoatomic ion transmembrane transport,0,1,0,0,0,0,1
+response to virus,0,1,0,0,0,0,1
+ketone biosynthetic process,0,1,0,0,0,0,1
+carbohydrate transport,0,0,1,1,0,0,2
+rRNA base methylation,0,0,1,0,0,0,1
+monocarboxylic acid metabolic process,0,0,1,0,0,0,1
+bacterial-type flagellum organization,0,0,1,0,0,0,1
+cellular detoxification,0,0,1,0,0,0,1
+hexose import across plasma membrane,0,0,1,0,0,0,1
+lipid A biosynthetic process,0,0,1,1,0,0,2
+nucleobase-containing small molecule interconversion,0,0,1,1,0,0,2
+L-amino acid transport,0,0,1,1,0,0,2
+energy derivation by oxidation of organic compounds,0,0,1,1,0,0,2
+DNA recombination,0,0,0,1,0,0,1
+RNA methylation,0,0,0,1,0,0,1
+alcohol biosynthetic process,0,0,0,1,0,0,1
+purine ribonucleoside triphosphate biosynthetic process,0,0,0,1,0,0,1
+lipopolysaccharide core region biosynthetic process,0,0,0,1,0,0,1
