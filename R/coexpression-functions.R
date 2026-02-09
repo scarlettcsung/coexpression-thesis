@@ -129,7 +129,9 @@ coexpr_analysis <- function(counts, replicates) {
   sorted <- tmm[order(rowMeans(tmm)), ]
   lemmed <- meanResiduals(sorted)
   less_pc <- suppressMessages(removePCs(sorted, 1))
-  results <- list(Original = sorted, MeanResiduals = lemmed, PC1Residuals = less_pc)
+  results <- list(Original = sorted, 
+                  MeanResiduals = lemmed, 
+                  PC1Residuals = less_pc)
   results <- lapply(results, function(x) x[rownames(counts), ])
   
   means <- stats::setNames(rowMeans(sorted), rownames(sorted))
@@ -137,170 +139,29 @@ coexpr_analysis <- function(counts, replicates) {
   corr_mr <- corAndSpQN(results$MeanResiduals, means)
   corr_pc1 <- corAndSpQN(results$PC1Residuals, means)
   
-  matrix <- list(Original = corr_og, 
-                        MeanResiduals = corr_mr, 
-                        PC1Residuals = corr_pc1,
-                        CLR = comp_pcc,
-                        propr = pr,
-                        propr_z = pr_z)
-  genepairs <- list(Original = get_genepairs(corr_og), 
-                  MeanResiduals = get_genepairs(corr_mr), 
-                  PC1Residuals = get_genepairs(corr_pc1),
-                  CLR = get_genepairs(comp_pcc),
-                  propr = get_genepairs(pr),
-                  propr_z = get_genepairs(pr_z))
+  matrix <- list()
+  matrix$Original = corr_og
+  matrix$MeanResiduals = corr_mr
+  matrix$PC1Residuals = corr_pc1
+  matrix$CLR = comp_pcc
+  matrix$propr = pr
+  matrix$propr_z = pr_z
+  
+  genepairs <- list()
+  genepairs$Original = get_genepairs(corr_og)
+  genepairs$MeanResiduals = get_genepairs(corr_mr)
+  genepairs$PC1Residuals = get_genepairs(corr_pc1)
+  genepairs$CLR = get_genepairs(comp_pcc)
+  genepairs$propr = get_genepairs(pr)
+  genepairs$propr_z = get_genepairs(pr_z)
+  
   output <- list(matrix = matrix, genepairs = genepairs)
   
   return(output)
 }
 
 # ================= DENSITY PLOTS =================
-plot_collapsed_by_subset <- function(all_cors) {
-  
-  # ---- reshape to long ----
-  cors_df <- do.call(rbind, lapply(names(all_cors), function(method) {
-    do.call(rbind, lapply(names(all_cors[[method]]), function(subset) {
-      data.frame(
-        value  = all_cors[[method]][[subset]],
-        Method = method,
-        Subset = subset,
-        stringsAsFactors = FALSE
-      )
-    }))
-  }))
-  
-  cors_df$Subset <- factor(
-    cors_df$Subset,
-    levels = c(
-      "Bottom 10% to self",
-      "Middle 10% to self",
-      "Top 10% to self",
-      "Bottom 10% to Top 10%"
-    )
-  )
-  
-  # ---- plot ----
-  ggplot(cors_df, aes(x = value, y = Method, fill = Method)) +
-    geom_segment(aes(x = -1, xend = 1, yend = Method), alpha = 0.4) +
-    ggridges::geom_density_ridges(
-      scale = 0.9,
-      quantile_lines = TRUE,
-      show.legend = FALSE
-    ) +
-    facet_wrap(~ Subset, nrow = 1) +
-    scale_x_continuous(limits = c(-1, 1)) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    coord_flip() +
-    theme_minimal(base_size = 7) +
-    theme(
-      axis.title = element_blank(),
-      strip.text = element_text(size = 7),
-      axis.text.y = element_text(size = 6)
-    )
-}
 
-plot_all_methods_by_bins <- function(counts, replicates) {
-  
-  # ---------------- Helper functions ----------------
-  ..sort_bins <- function(expr_matrix) {
-    dec <- floor(nrow(expr_matrix)/10)
-    bins <- list(
-      low  = expr_matrix[seq(1, length.out = dec), ],
-      mid  = expr_matrix[seq(from = (nrow(expr_matrix) - dec)/2, length.out = dec), ],
-      top  = expr_matrix[seq(to = nrow(expr_matrix), length.out = dec), ]
-    )
-    combined <- rbind(bins$low, bins$top)
-    list(bins = bins, cross = combined)
-  }
-  
-  ..gatherCors <- function(expr_matrix) {
-    bin_data <- ..sort_bins(expr_matrix)
-    bins <- bin_data$bins
-    cross <- bin_data$cross
-    
-    stats::setNames(mapply(function(x, y) {
-      mat <- WGCNA::cor(t(bins[[x]]), t(bins[[y]]))
-      mat[upper.tri(mat)]
-    }, x = c("low","mid","top","low"), y = c("low","mid","top","top"), SIMPLIFY = F),
-    c("Bottom 10% to self", "Middle 10% to self", "Top 10% to self", "Bottom 10% to Top 10%"))
-  }
-  
-  ..gatherFullCors <- function(corr_matrix) {
-    n <- nrow(corr_matrix)
-    dec <- floor(n / 10)
-    indices <- list(
-      low = 1:dec,
-      mid = floor((n - dec)/2 + 1):(floor((n - dec)/2 + 1) + dec - 1),
-      top = (n - dec + 1):n
-    )
-    list(
-      "Bottom 10% to self" = corr_matrix[indices$low, indices$low] |> as.vector(),
-      "Middle 10% to self" = corr_matrix[indices$mid, indices$mid] |> as.vector(),
-      "Top 10% to self" = corr_matrix[indices$top, indices$top] |> as.vector(),
-      "Bottom 10% to Top 10%" = corr_matrix[indices$low, indices$top] |> as.vector()
-    )
-  }
-  
-  ..denPlot <- function(cor_list) {
-    ..corToRGB <- function(cor) {
-      cor_colors <- c("#67001F","#B2182B","#D6604D","#F4A582","#FDDBC7","#FFFFFF",
-                      "#D1E5F0","#92C5DE","#4393C3","#2166AC","#053061")
-      to_color <- grDevices::colorRamp(cor_colors)
-      grDevices::rgb(to_color((cor+1)/2), maxColorValue = 255)
-    }
-    medians <- lapply(cor_list, median)
-    fills <- unlist(lapply(medians, ..corToRGB))
-    
-    ggplot(utils::stack(cor_list), aes(x = values, y = ind, fill = ind)) +
-      geom_segment(mapping = aes(x=-1, xend=1, y=ind, yend=ind)) +
-      ggridges::geom_density_ridges(scale=0.95, quantile_lines=TRUE, show.legend = FALSE) +
-      scale_fill_manual(values=fills) +
-      ggridges::theme_ridges(center_axis_labels = TRUE) +
-      theme(axis.text.x=element_text(size = 1, hjust=0),
-            axis.text.y = element_text(size = 1),
-            axis.title.x=element_blank(),
-            axis.title.y=element_blank()) +
-      scale_x_continuous(limits=c(-1,1)) +
-      scale_y_discrete(expand = expansion(mult=c(0.03,0.05))) +
-      geom_vline(xintercept = 0, linetype="dashed") +
-      coord_flip()
-  }
-  
-  # ---------------- TMM-based ----------------
-  tmm <- logTMM(counts, replicates = replicates)
-  sorted <- tmm[order(rowMeans(tmm)), ]
-  lemmed <- meanResiduals(sorted)
-  less_pc <- suppressMessages(removePCs(sorted, 1))
-  
-  tmm_results <- list(
-    Original = sorted,
-    MeanResiduals = lemmed,
-    PC1Residuals = less_pc
-  )
-  
-  tmm_cors <- lapply(tmm_results, ..gatherCors)
-  
-  # ---------------- CLR / propr / propr_z ----------------
-  counts_t <- t(counts)
-  counts_sorted <- sort_expression(counts_t)
-  z_counts <- cmultRepl(counts_sorted, method="CZM", output="p-counts")
-  
-  CLR <- get_pcc(get_compositions(z_counts))
-  propr_mat <- get_corrs(counts_sorted)
-  propr_z_mat <- get_corrs(z_counts)
-  
-  extra_cors <- list(
-    CLR = ..gatherFullCors(CLR),
-    propr = ..gatherFullCors(propr_mat),
-    propr_z = ..gatherFullCors(propr_z_mat)
-  )
-  
-  # ---------------- Combine all ----------------
-  all_cors <- c(tmm_cors, extra_cors)
-  
-  # ---------------- Plot everything ----------------
-  print(plot_collapsed_by_subset(all_cors))
-}
 
 # ================= GO-ID MATCHES =================
 
