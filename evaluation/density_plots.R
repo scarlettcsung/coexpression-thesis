@@ -23,12 +23,33 @@ binned_burk <- extract_bin_correlations(burk_ordered_matrices)
 binned_k12 <- extract_bin_correlations(k12_ordered_matrices)
 binned_bac <- extract_bin_correlations(bac_ordered_matrices)
 
-my_order <- c("Original", "MeanResiduals", "PC1Residuals", "CLR", "propr")
+method_order <- c("Original", "MeanResiduals", "PC1Residuals", 
+              "CLR", "propr","propr_z")
+dataset_order <- c("B_pseudomallei","E_coli","B_subtillis")
 
-binned <- list(Bpseudomallei = binned_burk,
-               Ecoli = binned_k12,
-               Bsubtillis = binned_bac)
+binned <- list(B_pseudomallei = binned_burk,
+               E_coli = binned_k12,
+               B_subtillis = binned_bac)
 
 binned_combined <- dplyr::bind_rows(binned, .id = "dataset")
+saveRDS(binned_combined, file = "evaluation/binned_combined.rds")
 
-plot_multidataset_collapsed(binned_combined, method_order = my_order)
+png("evaluation/density_coexpression.png", 
+    width = 14, 
+    height = 6, 
+    units = "in", 
+    res = 300)
+
+plot_multidataset_collapsed(binned_combined, 
+                            method_order = method_order,
+                            dataset_order = dataset_order)
+
+dev.off()
+
+median_summary <- generate_median_table(binned_combined)
+
+# View it in RStudio
+View(median_summary)
+write.csv(median_summary, 
+          "evaluation/coexpression_medians.csv", 
+          row.names = FALSE)
