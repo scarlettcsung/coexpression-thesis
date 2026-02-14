@@ -1,11 +1,8 @@
 source("R/packages.R")
 
 # ================= DATA SETUP =================
-dfs <- list(
-  B_pseudomallei = readRDS("results/burkholderia_GOmatches.rds"),
-  E_coli  = readRDS("results/k12_GOmatches.rds"),
-  B_subtilis  = readRDS("results/bacillus_GOmatches.rds")
-)
+ko_df <- E_coli  = readRDS("results/k12_komatches.rds")
+n_genepairs <- floor(nrow(ko_df$Original) * 0.005)
 
 # BAR CHART
 mean_at_subset <- lapply(names(dfs),function(nm) {
@@ -66,13 +63,13 @@ binned_dataset <- function(df,num_bins,dataset_mean) {
       propr = mean(propr, na.rm = TRUE),
       propr_z = mean(propr_z, na.rm = TRUE)
     )
-
+  
   summary_df_long <- summary_df %>%
     tidyr::pivot_longer(cols = -top_row, names_to = "method", values_to = "percent")
   summary_df_long <- summary_df_long %>%
     mutate(
       diff_from_mean = (percent - dataset_mean)*100
-  )
+    )
   return(summary_df_long)
 }
 
@@ -111,8 +108,8 @@ binned_burk <- ggplot(burk_summary,
                       aes(x = top_row, y = diff_from_mean, color = method)) +
   geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
   labs(# title = "B. pseudomallei",
-       x = "n gene pairs", 
-       y = y_lab) +
+    x = "n gene pairs", 
+    y = y_lab) +
   scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
                      breaks = seq(0, max(burk_summary$top_row), by = 500000)) +
   scale_y_continuous(labels = scales::label_comma(), # Added commas for readability
@@ -128,11 +125,11 @@ binned_burk <- ggplot(burk_summary,
 
 
 binned_k12 <- ggplot(k12_summary, 
-                      aes(x = top_row, y = diff_from_mean, color = method)) +
+                     aes(x = top_row, y = diff_from_mean, color = method)) +
   geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
   labs(# title = "E. coli",
-       x = "n gene pairs", 
-       y = y_lab) +
+    x = "n gene pairs", 
+    y = y_lab) +
   scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
                      breaks = seq(0, max(k12_summary$top_row), by = 1000000))+
   theme_minimal() +
@@ -142,11 +139,11 @@ binned_k12 <- ggplot(k12_summary,
     legend.position = "none")
 
 binned_bac <- ggplot(bac_summary, 
-                      aes(x = top_row, y = diff_from_mean, color = method)) +
+                     aes(x = top_row, y = diff_from_mean, color = method)) +
   geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
   labs(# title = "B. subtilis",
-       x = "n gene pairs", 
-       y = y_lab) +
+    x = "n gene pairs", 
+    y = y_lab) +
   scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
                      breaks = seq(0, max(bac_summary$top_row), by = 500000)) +
   theme_minimal() +

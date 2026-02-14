@@ -1,10 +1,10 @@
 source("R/packages.R")
 source("R/permutation_testing_functions.R")
 
-df <- readRDS("results/k12_GOmatches.rds")
+df <- readRDS("results/bacillus_GOmatches.rds")
 
-n_permutations <- 5000
-n_genepairs <- floor(nrow(df$Original) * 0.001)
+n_permutations <- 10000
+n_genepairs <- floor(nrow(df$Original) * 0.005)
 mean_allpairs <- df$Original[nrow(df$Original),"GO_match_cumulative"]/100
 
 
@@ -14,7 +14,7 @@ background_means <- generate_background_means(allgenepairs_df = df$Original,
                                               col = "GO_overlap",
                                               seed = 41)
 
-saveRDS(background_means,"evaluation/k12_background_means_5000perms.rds")
+saveRDS(background_means,"evaluation/bac_background_means_10000perms.rds")
 
 p_vals <- sapply(names(df),function(nm) {
   df_method <- df[[nm]]
@@ -25,4 +25,4 @@ p_vals <- sapply(names(df),function(nm) {
                     n_permutations = n_permutations)
 })
   
-saveRDS(p_vals,"evaluation/k12_pvals_5000perms.rds")  
+saveRDS(p_vals,"evaluation/bac_pvals_10000perms.rds")  
