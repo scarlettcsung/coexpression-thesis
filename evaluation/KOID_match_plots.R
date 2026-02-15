@@ -1,50 +1,38 @@
 source("R/packages.R")
 
 # ================= DATA SETUP =================
-ko_df <- E_coli  = readRDS("results/k12_komatches.rds")
+ko_df <- readRDS("results/k12_komatches.rds")
 n_genepairs <- floor(nrow(ko_df$Original) * 0.005)
+total_mean <- ko_df$Original$cumulative_shared_pct[nrow(ko_df$Original)]
 
 # BAR CHART
-mean_at_subset <- lapply(names(dfs),function(nm) {
-  df <- dfs[[nm]]
-  n_genepairs <- floor(nrow(df$Original) * 0.005)
-  
-  sapply(names(df),function(method) {
-    df_method <- df[[method]]
-    df_method$GO_match_cumulative[n_genepairs]
+mean_at_subset <- sapply(names(ko_df),function(method) {
+    df_method <- ko_df[[method]]
+    return(df_method$cumulative_shared_pct[n_genepairs])
   })
-})
-mean_at_subset <- setNames(mean_at_subset, names(dfs))
 
-method_order <- names(mean_at_subset[[1]])
-dataset_order <- c("B_pseudomallei","E_coli","B_subtilis")
+mean_at_subset <- setNames(mean_at_subset, names(ko_df))
 
-df_plot <- map2_dfr(mean_at_subset, names(mean_at_subset), ~{
-  tibble(
-    method = names(.x),
-    percent = .x ,    # convert from fraction to percent
-    dataset = .y
-  )
-})
-
-full_means <- c("B_pseudomallei" = 2.87786, 
-                "E_coli" = 4.87045, 
-                "B_subtilis" = 5.65051)
-
-df_plot <- df_plot %>%
+# Convert the named vector into a clean tibble
+df_plot <- tibble(
+  method = names(mean_at_subset),
+  percent = mean_at_subset
+) %>%
   mutate(
-    dataset_mean = full_means[dataset],
-    diff_from_mean = percent - dataset_mean
+    diff_from_mean = percent - total_mean
   )
 
+method_order <- c("Original","MeanResiduals","PC1Residuals",
+                  "CLR","propr","propr_z")
+
+# Set the factor levels (e.g., sorted by the percentage value)
 df_plot <- df_plot %>%
-  mutate(method = factor(method, levels = method_order),
-         dataset = factor(dataset, levels = dataset_order))
+  mutate(method = factor(method, levels = method_order))
 
 # BINNED PLOT
 
-binned_dataset <- function(df,num_bins,dataset_mean) {
-  comb_overlap <- do.call(cbind, lapply(df, function(x) x$GO_overlap))
+binned_dataset_ko <- function(df,num_bins,dataset_mean) {
+  comb_overlap <- do.call(cbind, lapply(df, function(x) x$shared_operon))
   colnames(comb_overlap) <- names(df)
   comb_overlap <- as.data.frame(comb_overlap)
   
@@ -56,28 +44,25 @@ binned_dataset <- function(df,num_bins,dataset_mean) {
   summary_df <- comb_overlap %>%
     group_by(top_row) %>%
     summarize(
-      Original = mean(Original, na.rm = TRUE),
-      MeanResiduals = mean(MeanResiduals, na.rm = TRUE),
-      PC1 = mean(PC1Residuals, na.rm = TRUE),
-      CLR = mean(CLR, na.rm = TRUE),
-      propr = mean(propr, na.rm = TRUE),
-      propr_z = mean(propr_z, na.rm = TRUE)
+      Original = mean(Original, na.rm = TRUE)*100,
+      MeanResiduals = mean(MeanResiduals, na.rm = TRUE)*100,
+      PC1 = mean(PC1Residuals, na.rm = TRUE)*100,
+      CLR = mean(CLR, na.rm = TRUE)*100,
+      propr = mean(propr, na.rm = TRUE)*100,
+      propr_z = mean(propr_z, na.rm = TRUE)*100
     )
   
   summary_df_long <- summary_df %>%
     tidyr::pivot_longer(cols = -top_row, names_to = "method", values_to = "percent")
   summary_df_long <- summary_df_long %>%
     mutate(
-      diff_from_mean = (percent - dataset_mean)*100
+      diff_from_mean = (percent - dataset_mean)
     )
   return(summary_df_long)
 }
 
 num_bins = 1000
-
-burk_summary <- binned_dataset(dfs$B_pseudomallei,num_bins,0.0287786)
-k12_summary <- binned_dataset(dfs$E_coli,num_bins,0.0487045)
-bac_summary <- binned_dataset(dfs$B_subtilis,num_bins,0.0565051)
+k12_summary <- binned_dataset_ko(ko_df,num_bins,total_mean)
 
 # ================= PLOTTING =================
 
@@ -89,31 +74,30 @@ y_lab <- expression(Delta * " % GO Overlap")
 # Bar Chart
 
 barchart <- ggplot(df_plot, 
-                   aes(x = method, y = diff_from_mean, fill = dataset)) +
+                   aes(x = method, y = diff_from_mean)) +
   geom_col(position = position_dodge(width = 0.9)) +
   theme_minimal() +
   labs(
     x = "Method",
-    y = y_lab,
-    fill = "Dataset species"
+    y = y_lab
   ) +
-  scale_fill_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set1") +
   theme(
     axis.text.x = element_text(angle = 30, hjust = 1)
   )
 
+barchart
+
 # Binned GO-ID % Matches
 
-binned_burk <- ggplot(burk_summary, 
-                      aes(x = top_row, y = diff_from_mean, color = method)) +
+binned_k12 <- ggplot(k12_summary,
+                     aes(x = top_row, y = diff_from_mean, color = method)) +
   geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
   labs(# title = "B. pseudomallei",
     x = "n gene pairs", 
     y = y_lab) +
   scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
-                     breaks = seq(0, max(burk_summary$top_row), by = 500000)) +
-  scale_y_continuous(labels = scales::label_comma(), # Added commas for readability
-                     breaks = seq(0, 22, by = 5)) +
+                     breaks = seq(0, max(k12_summary$top_row), by = 1000000)) +
   theme_minimal()+
   theme(
     plot.title = element_text(size = 11, face = "bold", hjust = 0.5),
@@ -123,59 +107,20 @@ binned_burk <- ggplot(burk_summary,
     # Optional: Add a background/border to make it readable
     legend.background = element_rect(fill = "white", color = "lightgrey"))
 
-
-binned_k12 <- ggplot(k12_summary, 
-                     aes(x = top_row, y = diff_from_mean, color = method)) +
-  geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
-  labs(# title = "E. coli",
-    x = "n gene pairs", 
-    y = y_lab) +
-  scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
-                     breaks = seq(0, max(k12_summary$top_row), by = 1000000))+
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 11, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(angle = 30, hjust = 1),
-    legend.position = "none")
-
-binned_bac <- ggplot(bac_summary, 
-                     aes(x = top_row, y = diff_from_mean, color = method)) +
-  geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
-  labs(# title = "B. subtilis",
-    x = "n gene pairs", 
-    y = y_lab) +
-  scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
-                     breaks = seq(0, max(bac_summary$top_row), by = 500000)) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 11, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(angle = 30, hjust = 1), 
-    legend.position = "none")
-
 # Combine plots
 library(cowplot)
 
 plot_grid(
   barchart, 
-  binned_burk + 
-    geom_vline(xintercept = floor(nrow(dfs$B_pseudomallei$Original) * 0.005), 
-               linetype = "dashed", color = "red", linewidth = 0.5) +
-    geom_magnify(from = c(-0.2,300000,-1,22),
-                 to = c(420000, 2000000, 4, 24)),
   binned_k12 + 
-    geom_vline(xintercept = floor(nrow(dfs$E_coli$Original) * 0.005), 
+    geom_vline(xintercept = floor(nrow(ko_df$Original) * 0.005), 
                linetype = "dashed", color = "red", linewidth = 0.5) +
-    geom_magnify(from = c(-0.1,300000,-0.5,17),
-                 to = c(750000, 4200000, 4, 18)),
-  binned_bac + 
-    geom_vline(xintercept = floor(nrow(dfs$B_subtilis$Original) * 0.005), 
-               linetype = "dashed", color = "red", linewidth = 0.5) +
-    geom_magnify(from = c(-0.1,200000,-1,36),
-                 to = c(450000, 2250000, 8, 40)),
+    geom_magnify(from = c(-0.1,500000,-0.1,5.8),
+                 to = c(950000, 6500000, 1, 6)),
   labels = "AUTO",
   label_size = 14,
   label_fontface = "bold",
-  nrow = 2,
+  nrow = 1,
   ncol = 2
 )
 
