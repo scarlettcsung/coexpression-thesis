@@ -69,7 +69,7 @@ k12_summary <- binned_dataset_ko(ko_df,num_bins,total_mean)
 library(scales)
 library(ggmagnify)
 
-y_lab <- expression(Delta * " % GO Overlap")
+y_lab <- expression(Delta * " % Operon Overlap")
 
 # Bar Chart
 
@@ -85,8 +85,6 @@ barchart <- ggplot(df_plot,
   theme(
     axis.text.x = element_text(angle = 30, hjust = 1)
   )
-
-barchart
 
 # Binned GO-ID % Matches
 
@@ -115,7 +113,7 @@ plot_grid(
   binned_k12 + 
     geom_vline(xintercept = floor(nrow(ko_df$Original) * 0.005), 
                linetype = "dashed", color = "red", linewidth = 0.5) +
-    geom_magnify(from = c(-0.1,500000,-0.1,5.8),
+    geom_magnify(from = c(-0.1,500000,-0.1,5.5),
                  to = c(950000, 6500000, 1, 6)),
   labels = "AUTO",
   label_size = 14,

@@ -3,7 +3,7 @@ source("R/coexpression-functions.R")
 
 # ================= DATA SETUP =================
 
-path <- "data/bacillus_counts.csv" # File Path
+path <- "data/BURK_counts.csv" # File Path
 raw_counts <- read.csv(path, header=TRUE, row.names = 1) # Load .csv
 raw_counts <- raw_counts[order(colnames(raw_counts))]
 

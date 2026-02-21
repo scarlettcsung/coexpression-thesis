@@ -182,8 +182,11 @@ plot_grid(
   ncol = 2
 )
 
-# ================= PLOTTING (SUPPLEMENTARY) =================
+# ================= PLOTTING (ADDITIONAL) =================
 
+combined_burk <- do.call(cbind, lapply(dfs$B_pseudomallei, function(x) x$GO_match_cumulative))
+combined_k12 <- do.call(cbind, lapply(df_list, function(x) x$GO_match_cumulative))
+combined_bac <- do.call(cbind, lapply(df_list, function(x) x$GO_match_cumulative))
 
 ggplot(summary_df_long, aes(x = top_row, y = diff_from_mean)) +
   geom_line() +

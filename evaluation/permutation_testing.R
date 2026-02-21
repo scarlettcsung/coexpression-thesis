@@ -1,28 +1,28 @@
 source("R/packages.R")
 source("R/permutation_testing_functions.R")
 
-df <- readRDS("results/bacillus_GOmatches.rds")
+df <- readRDS("results/k12_komatches.rds")
 
 n_permutations <- 10000
 n_genepairs <- floor(nrow(df$Original) * 0.005)
-mean_allpairs <- df$Original[nrow(df$Original),"GO_match_cumulative"]/100
+mean_allpairs <- df$Original[nrow(df$Original),"cumulative_shared_pct"]
 
 
 background_means <- generate_background_means(allgenepairs_df = df$Original,
                                               n_permutations = n_permutations,
                                               n_genepairs = n_genepairs,
-                                              col = "GO_overlap",
+                                              col = "shared_operon",
                                               seed = 41)
 
-saveRDS(background_means,"evaluation/bac_background_means_10000perms.rds")
+saveRDS(background_means,"evaluation/k12_ko_background_means_10000perms.rds")
 
 p_vals <- sapply(names(df),function(nm) {
   df_method <- df[[nm]]
-  mean_subset <- df_method[n_genepairs,"GO_match_cumulative"]
+  mean_subset <- df_method[n_genepairs,"cumulative_shared_pct"]
   calc_background_p(background_means = background_means,
                     mean_allpairs = mean_allpairs,
                     mean_subset = mean_subset,
                     n_permutations = n_permutations)
 })
   
-saveRDS(p_vals,"evaluation/bac_pvals_10000perms.rds")  
+saveRDS(p_vals,"evaluation/k12_ko_pvals_10000perms.rds")  
