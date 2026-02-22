@@ -11,8 +11,9 @@ raw_counts <- raw_counts[order(colnames(raw_counts))]
 
 # Filtered Counts
 counts <- filterLowExpression(raw_counts) #Rows: Gene name, Columns: Conditions
-counts_filtered <- counts[rowSums(counts) > 0, colSums(counts) > 0]
 replicates = 2
+
+gc()
 
 bm1 <- bench::mark(
   Original       = corrs_Original(counts, replicates),
@@ -22,6 +23,8 @@ bm1 <- bench::mark(
   check = FALSE,          # skip automatic equality checks
   gc = TRUE
 )
+
+gc()
 
 bm2 <- bench::mark(
   CLR            = corrs_CLR(counts),
@@ -50,6 +53,7 @@ bm %>%
     sd_time   = sd(as.numeric(as_bench_time(unlist(time)), units = "ms"))
   )
 
+saveRDS(bm,"evaluation/eval_results/comp_benchmark_results.rds")
 
 plot_data <- bm %>%
   dplyr::select(expression,time) %>%
@@ -92,3 +96,30 @@ combined_plot <- p1 + p2 +
 
 # Display
 combined_plot
+
+bm <- readRDS("evaluation/eval_results/comp_benchmark_results.rds")
+
+bm_friedman <- bm %>%
+  dplyr::select(expression, time) %>%
+  tidyr::unnest(time) %>%                  # expand the list-column of times
+  mutate(
+    time_s = as.numeric(time)
+    ) %>%
+  dplyr::select(expression, time_s)
+
+friedman_mat_df <- bm_friedman %>%
+  group_by(expression) %>%
+  mutate(iter = row_number()) %>%
+  tidyr::pivot_wider(names_from = expression, values_from = time_s)
+
+friedman_mat <- as.matrix(friedman_mat_df[,-1])
+friedman <- friedman.test(friedman_mat)  
+
+n_iter <- nrow(friedman_mat)
+n_method <- ncol(friedman_mat)
+x <- as.vector(friedman_mat)
+g <- rep(colnames(friedman_mat), each = n_iter) 
+b <- rep(1:n_iter, times = n_method)  
+xDF <- data.frame(x = x, g = factor(g), b = b)
+
+frdAllPairsNemenyiTest(xDF$x[o], groups = xDF$g[o], blocks = xDF$b[o])
