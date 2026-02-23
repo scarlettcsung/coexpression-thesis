@@ -1,7 +1,9 @@
 source("R/packages.R")
 source("R/coexpression-functions.R")
 
-library(bench)
+librarian::shelf(
+  bench,patchwork
+)
 
 path <- "data/k12_counts.csv" # File Path
 raw_counts <- read.csv(path, header=TRUE, row.names = 1) # Load .csv
@@ -90,7 +92,7 @@ p2 <- ggplot(bm_for_plot, aes(x = fct_rev(expression), y = mem_gb)) +
   labs(x = NULL, y = "Memory (GB)") +
   theme(axis.text.y = element_blank())
 
-library(patchwork)
+
 combined_plot <- p1 + p2 + 
   plot_layout(widths = c(1.2, 1))
 

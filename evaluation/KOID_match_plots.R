@@ -1,4 +1,12 @@
 source("R/packages.R")
+source("R/plotting-functions")
+
+librarian::shelf(
+  scales,magnify,
+  cowplot
+  )
+
+# Usage: run in IDE, this produces plots for KOID matches.
 
 # ================= DATA SETUP =================
 ko_df <- readRDS("results/k12_komatches.rds")
@@ -29,45 +37,10 @@ method_order <- c("Original","MeanResiduals","PC1Residuals",
 df_plot <- df_plot %>%
   mutate(method = factor(method, levels = method_order))
 
-# BINNED PLOT
-
-binned_dataset_ko <- function(df,num_bins,dataset_mean) {
-  comb_overlap <- do.call(cbind, lapply(df, function(x) x$shared_operon))
-  colnames(comb_overlap) <- names(df)
-  comb_overlap <- as.data.frame(comb_overlap)
-  
-  total_rows <- nrow(comb_overlap)
-  N <- ceiling(total_rows / num_bins)
-  comb_overlap$block <- ceiling(seq_len(total_rows) / N)
-  comb_overlap$top_row <- pmin(comb_overlap$block * N, total_rows)
-  
-  summary_df <- comb_overlap %>%
-    group_by(top_row) %>%
-    summarize(
-      Original = mean(Original, na.rm = TRUE)*100,
-      MeanResiduals = mean(MeanResiduals, na.rm = TRUE)*100,
-      PC1 = mean(PC1Residuals, na.rm = TRUE)*100,
-      CLR = mean(CLR, na.rm = TRUE)*100,
-      propr = mean(propr, na.rm = TRUE)*100,
-      propr_z = mean(propr_z, na.rm = TRUE)*100
-    )
-  
-  summary_df_long <- summary_df %>%
-    tidyr::pivot_longer(cols = -top_row, names_to = "method", values_to = "percent")
-  summary_df_long <- summary_df_long %>%
-    mutate(
-      diff_from_mean = (percent - dataset_mean)
-    )
-  return(summary_df_long)
-}
-
 num_bins = 1000
 k12_summary <- binned_dataset_ko(ko_df,num_bins,total_mean)
 
 # ================= PLOTTING =================
-
-library(scales)
-library(ggmagnify)
 
 y_lab <- expression(Delta * " % Operon Overlap")
 
@@ -86,7 +59,7 @@ barchart <- ggplot(df_plot,
     axis.text.x = element_text(angle = 30, hjust = 1)
   )
 
-# Binned GO-ID % Matches
+# Binned KOID % Matches
 
 binned_k12 <- ggplot(k12_summary,
                      aes(x = top_row, y = diff_from_mean, color = method)) +
@@ -106,8 +79,6 @@ binned_k12 <- ggplot(k12_summary,
     legend.background = element_rect(fill = "white", color = "lightgrey"))
 
 # Combine plots
-library(cowplot)
-
 plot_grid(
   barchart, 
   binned_k12 + 
@@ -121,18 +92,3 @@ plot_grid(
   nrow = 1,
   ncol = 2
 )
-
-# ================= PLOTTING (SUPPLEMENTARY) =================
-
-
-ggplot(summary_df_long, aes(x = top_row, y = diff_from_mean)) +
-  geom_line() +
-  scale_x_continuous(
-    breaks = seq(0, max_row, by = 1000000),
-    labels = label_number(accuracy = 1) # show every 5th block
-  ) +
-  labs(x = "n gene pair (1000 bins) ",
-       y = "Fraction of GO-matching pairs") +
-  theme_minimal() +
-  facet_wrap(~ method, nrow = 2)  # 2 rows, 3 plots per row
-

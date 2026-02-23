@@ -34,13 +34,5 @@ librarian::shelf(
   data.table,
   tidyverse,
   # Plotting
-  ggplot2,
-  ggridges,
-  patchwork
+  ggplot2
 )
-
-
-library(GO.db)
-library(AnnotationDbi)
-library(ontologyIndex)
-library(bench)

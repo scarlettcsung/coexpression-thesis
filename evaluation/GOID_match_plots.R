@@ -1,10 +1,18 @@
 source("R/packages.R")
+source("R/plotting_functions.R")
+
+librarian::shelf(
+  scales,magnify,
+  cowplot
+)
+
+# Usage: run in IDE, this produces plots for GO-ID matches.
 
 # ================= DATA SETUP =================
 dfs <- list(
-  B_pseudomallei = readRDS("results/burkholderia_GOmatches.rds"),
-  E_coli  = readRDS("results/k12_GOmatches.rds"),
-  B_subtilis  = readRDS("results/bacillus_GOmatches.rds")
+  B_pseudomallei = readRDS("results_ignore/burkholderia_GOmatches.rds"),
+  E_coli  = readRDS("results_ignore/k12_GOmatches.rds"),
+  B_subtilis  = readRDS("results_ignore/bacillus_GOmatches.rds")
 )
 
 # BAR CHART
@@ -30,6 +38,7 @@ df_plot <- map2_dfr(mean_at_subset, names(mean_at_subset), ~{
   )
 })
 
+# BINS
 full_means <- c("B_pseudomallei" = 2.87786, 
                 "E_coli" = 4.87045, 
                 "B_subtilis" = 5.65051)
@@ -44,37 +53,6 @@ df_plot <- df_plot %>%
   mutate(method = factor(method, levels = method_order),
          dataset = factor(dataset, levels = dataset_order))
 
-# BINNED PLOT
-
-binned_dataset <- function(df,num_bins,dataset_mean) {
-  comb_overlap <- do.call(cbind, lapply(df, function(x) x$GO_overlap))
-  colnames(comb_overlap) <- names(df)
-  comb_overlap <- as.data.frame(comb_overlap)
-  
-  total_rows <- nrow(comb_overlap)
-  N <- ceiling(total_rows / num_bins)
-  comb_overlap$block <- ceiling(seq_len(total_rows) / N)
-  comb_overlap$top_row <- pmin(comb_overlap$block * N, total_rows)
-  
-  summary_df <- comb_overlap %>%
-    group_by(top_row) %>%
-    summarize(
-      Original = mean(Original, na.rm = TRUE),
-      MeanResiduals = mean(MeanResiduals, na.rm = TRUE),
-      PC1 = mean(PC1Residuals, na.rm = TRUE),
-      CLR = mean(CLR, na.rm = TRUE),
-      propr = mean(propr, na.rm = TRUE),
-      propr_z = mean(propr_z, na.rm = TRUE)
-    )
-
-  summary_df_long <- summary_df %>%
-    tidyr::pivot_longer(cols = -top_row, names_to = "method", values_to = "percent")
-  summary_df_long <- summary_df_long %>%
-    mutate(
-      diff_from_mean = (percent - dataset_mean)*100
-  )
-  return(summary_df_long)
-}
 
 num_bins = 1000
 
@@ -83,9 +61,6 @@ k12_summary <- binned_dataset(dfs$E_coli,num_bins,0.0487045)
 bac_summary <- binned_dataset(dfs$B_subtilis,num_bins,0.0565051)
 
 # ================= PLOTTING =================
-
-library(scales)
-library(ggmagnify)
 
 y_lab <- expression(Delta * " % GO Overlap")
 
@@ -123,7 +98,6 @@ binned_burk <- ggplot(burk_summary,
     axis.text.x = element_text(angle = 30, hjust = 1),
     # Move legend inside the plot
     legend.position = c(0.85, 0.65), 
-    # Optional: Add a background/border to make it readable
     legend.background = element_rect(fill = "white", color = "lightgrey"))
 
 
@@ -156,8 +130,6 @@ binned_bac <- ggplot(bac_summary,
     legend.position = "none")
 
 # Combine plots
-library(cowplot)
-
 plot_grid(
   barchart, 
   binned_burk + 
@@ -183,6 +155,8 @@ plot_grid(
 )
 
 # ================= PLOTTING (ADDITIONAL) =================
+
+# An early version of binned plots. 
 
 combined_burk <- do.call(cbind, lapply(dfs$B_pseudomallei, function(x) x$GO_match_cumulative))
 combined_k12 <- do.call(cbind, lapply(df_list, function(x) x$GO_match_cumulative))

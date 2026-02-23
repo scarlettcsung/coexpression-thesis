@@ -1,5 +1,4 @@
 source("R/packages.R")
-source("R/coexpression-functions.R")
 
 ko_matches <- saveRDS(ko_matches,file="results/k12_komatches.rds")
 
@@ -15,7 +14,6 @@ plot_df <- do.call(
   })
 )
 
-library(ggplot2)
 
 ggplot(plot_df,
        aes(x = pair_index,

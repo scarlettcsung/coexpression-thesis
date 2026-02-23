@@ -1,24 +1,26 @@
 source("R/packages.R")
-source("R/coexpression-functions.R")
+source("R/plotting-functions.R")
 
-matrices_burk <- readRDS("results/burkholderia_matrices.rds")
+# Re-order matrices 
+matrices_burk <- readRDS("results_ignore/burkholderia_matrices.rds")
 burk_sorted_names <- readRDS("reference/derived/burkholderia_genenames_sorted.rds")
 burk_ordered_matrices <- lapply(matrices_burk, function(m) {
   reorder_matrix(m, burk_sorted_names)
 })
 
-matrices_k12 <- readRDS("results/k12_matrices.rds")
+matrices_k12 <- readRDS("results_ignore/k12_matrices.rds")
 k12_sorted_names <- readRDS("reference/derived/k12_genenames_sorted.rds")
 k12_ordered_matrices <- lapply(matrices_k12, function(m) {
   reorder_matrix(m, k12_sorted_names)
 })
 
-matrices_bac <- readRDS("results/bacillus_matrices.rds")
+matrices_bac <- readRDS("results_ignore/bacillus_matrices.rds")
 bac_sorted_names <- readRDS("reference/derived/bacillus_genenames_sorted.rds")
 bac_ordered_matrices <- lapply(matrices_bac, function(m) {
   reorder_matrix(m, bac_sorted_names)
 })
 
+# Extract correlations by bins
 binned_burk <- extract_bin_correlations(burk_ordered_matrices)
 binned_k12 <- extract_bin_correlations(k12_ordered_matrices)
 binned_bac <- extract_bin_correlations(bac_ordered_matrices)
@@ -33,6 +35,7 @@ binned <- list(B_pseudomallei = binned_burk,
 
 binned_combined <- dplyr::bind_rows(binned, .id = "dataset")
 saveRDS(binned_combined, file = "evaluation/binned_combined.rds")
+
 
 png("evaluation/density_coexpression.png", 
     width = 14, 

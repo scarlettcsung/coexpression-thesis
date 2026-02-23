@@ -1,20 +1,32 @@
 source("R/packages.R")
-source("R/coexpression-functions.R")
+
+# ================= LOAD DEPENDENCIES =================
+# Install and load other required packages
+librarian::shelf(
+  tidyr, stringr,
+  dynamicTreeCut,
+  dendextend, colorspace
+)
+
+# Install if needed
+BiocManager::install(c("clusterProfiler","AnnotationDbi",
+                       "org.EcK12.eg.db","enrichplot",
+                       "GO.db"))
+
 # ================= DATA SETUP =================
-matrices <- readRDS("results/k12_matrices.rds")
+# Load matrices
+matrices <- readRDS("results_ignore/k12_matrices.rds")
 
 # ================= HIERARCHAL CLUSTERING OVERVIEW =================
-
+# Distance measure for histogram
 distances <- lapply(matrices, function(mat) 1 - mat)
 
-library(dynamicTreeCut)
+# Make histogram
 geneTrees <- lapply(distances, function(diss) {
   hclust(as.dist(diss), method = "average")
 })
 
-library(dendextend)
-library(colorspace)
-
+# Clustering with cutreeDynamic
 cluster_results <- lapply(names(geneTrees), function(nm) {
   
   tree <- geneTrees[[nm]]
@@ -45,6 +57,7 @@ cluster_results <- lapply(names(geneTrees), function(nm) {
   )
 })
 
+# Clustering with cutreeDynamic and plotting
 par(mfrow = c(2, 3))  # adjust to number of methods
 
 for (nm in names(geneTrees)) {
@@ -76,36 +89,14 @@ names(cluster_results) <- names(geneTrees)
 data.frame(
   n_clusters = sapply(cluster_results, `[[`, "n_clusters")
 )
-# ================= FILTER CLUSTERS =================
 
 for (nm in names(cluster_results)) {
   cat("\nMethod:", nm)
   print(table(cluster_results[[nm]]$clusters))
 }
-
-# IGNORE FOR NOW
-min_size <- 30
-filtered_clusters <- lapply(cluster_results, function(res) {
-  cl <- res$clusters
-  tab <- table(cl)
-  
-  keep <- names(tab)[tab >= min_size]
-  cl[cl %in% keep]
-})
-
-print(k)
-sapply(filtered_clusters, function(cl) {
-  length(unique(cl))/k
-})
-# STOP IGNORING
-
 saveRDS(cluster_results,"evaluation/k12_clusters.rds")
 
 # ================= GO ENRICHMENT =================
-
-library(dplyr)
-library(tidyr)
-library(stringr)
 
 # Make reference database to match locus tag to gene name for GO Enrichment
 gnr <- read_tsv("reference/derived/k12_gene_name_ref.tsv")
@@ -141,12 +132,6 @@ all_genes <- data.frame(
 ) %>%
   left_join(gnr_long, by = c("Gene" = "locus_tag")) %>%
   pull(symbol)
-
-library(clusterProfiler)
-library(org.EcK12.eg.db)
-library(AnnotationDbi) 
-library(GOSemSim)
-library(enrichplot)
 
 ego_all <- lapply(names(clusters_symbols), function(nm) {
   cl_df <- clusters_symbols[[nm]]
@@ -243,30 +228,3 @@ clusters <- cluster_results[[method]]$clusters
 genes_to_plot <-names(clusters)[clusters == cluster_num]
 genes_to_plot <- genes_to_plot[!is.na(genes_to_plot)]
 mat_subset <- matrices[[method]][genes_to_plot,genes_to_plot]
-
-library(pheatmap)
-
-par(mfrow = c(1, 3))  # adjust to number of methods
-
-pheatmap(mat_subset,
-         cluster_rows = TRUE,
-         cluster_cols = TRUE,
-         show_rownames = TRUE,
-         show_colnames = TRUE,
-         main = paste("Cluster", cluster_num, "Heatmap -", method)
-)
-
-long_df <- go_matrix %>%
-  select(Description, methods) %>%
-  separate_rows(methods, sep = ",\\s*")
-
-wide_df <- long_df %>%
-  mutate(value = 1L) %>%
-  pivot_wider(
-    names_from = methods,
-    values_from = value,
-    values_fill = 0
-  ) %>%
-  rowwise() %>%
-  mutate(method_sum = sum(c_across(where(is.numeric)))) %>%
-  ungroup()

@@ -1,3 +1,4 @@
+# Load packages
 source("R/packages.R")
 
 # ================= DATA PROCESSING =================
@@ -113,6 +114,8 @@ get_genepairs <- function(sim_matrix) {
 # COCOLOCUS/COBAIN.
 # Mainly, it was used to identify issues with formatting involving row names 
 # labeling.
+# Functions in this section includes the entire workflow for each method, for
+# computational benchmarking.
 
 #' @description
 #' Performs the entire "Original" workflow.
@@ -136,7 +139,8 @@ corrs_Original <- function(counts,replicates) {
   means <- stats::setNames(rowMeans(sorted), rownames(sorted))
   corr <- corAndSpQN(sorted,means)
   # Adding back gene names/locus tags
-  corr <- corr[rownames(counts), rownames(counts), drop = FALSE] 
+  corr <- corr[rownames(counts), rownames(counts), drop = FALSE]
+  message(sprintf("Correlation matrix produced for method 'Original'"))
   return(corr)
 }
 
@@ -167,6 +171,7 @@ corrs_MeanResiduals <- function(counts,replicates) {
   corr <- corAndSpQN(mr,means)
   # Adding back gene names/locus tags
   corr <- corr[rownames(counts), rownames(counts), drop = FALSE]
+  message(sprintf("Correlation matrix produced for method 'MeanResiduals'"))
   return(corr)
 }
 
@@ -195,6 +200,7 @@ corrs_PC1Residuals <- function(counts,replicates) {
   pc1 <- less_pc[rownames(sorted), ]
   corr <- corAndSpQN(pc1,means)
   corr <- corr[rownames(counts), rownames(counts), drop = FALSE]
+  message(sprintf("Correlation matrix produced for method 'PC1Residuals'"))
   return(corr)
 }
 
@@ -216,6 +222,7 @@ corrs_CLR <- function(counts) {
   z_counts <- cmultRepl(counts_sorted,method = "CZM",output="p-counts") 
   comp <- get_compositions(z_counts)
   comp_pcc <- get_pcc(comp)
+  message(sprintf("Correlation matrix produced for method 'CLR'"))
   return(comp_pcc)
 }
 
@@ -232,6 +239,7 @@ get_propr <- function(counts) {
   counts_t <- t(counts) 
   counts_sorted <- sort_expression(counts_t) 
   pr <- get_prop(counts_sorted)
+  message(sprintf("Similarity matrix produced for method 'propr'"))
   return(pr)
 }
 
@@ -251,10 +259,11 @@ get_zpropr <- function(counts) {
   counts_sorted <- sort_expression(counts_t)
   z_counts <- cmultRepl(counts_sorted,method = "CZM",output="p-counts")
   pr_z <- get_prop(z_counts)
+  message(sprintf("Similarity matrix produced for method 'propr + zCompositions'"))
   return(pr_z)
 }
 
-# ================= WRAPPER =================
+# ================= COMBINED METHODS =================
 # GPT 5.2 was used here for debugging and parsing logic, especially in 
 # extracting relevant parts from checkCorBias from COCOLOCUS/COBAIN. 
 
@@ -287,9 +296,12 @@ coexpr_analysis <- function(counts, replicates) {
   # CLR
   comp <- get_compositions(z_counts)
   comp_pcc <- get_pcc(comp)
+  message(sprintf("Correlation matrix produced for method 'CLR'"))
   # propr methods
-  pr <- get_prop(counts_sorted)
-  pr_z <- get_prop(z_counts)
+  pr <- suppressMessages(get_prop(counts_sorted))
+  message(sprintf("Similarity matrix produced for method 'propr'"))
+  pr_z <- suppressMessages(get_prop(z_counts))
+  message(sprintf("Similarity matrix produced for method 'propr + zCompositions'"))
   
   # TMM and log-transformation, and sorting by mean expression
   tmm <- logTMM(counts,replicates = replicates)
@@ -300,9 +312,8 @@ coexpr_analysis <- function(counts, replicates) {
   less_pc <- suppressMessages(removePCs(sorted, 1))
   
   # Combining results of COBAIN/COCOLOCUS methods to return row name labels 
-  # together.
-  # GPT 5.2 demonstrated lapply to process multiple datasets at once, which was
-  # a technique applied in other parts of the project as well
+  # together. Logic was retained from checkCorBias.ChatGPT was used here to 
+  # understand and apply data processing. 
   results <- list(Original = sorted, 
                   MeanResiduals = lemmed, 
                   PC1Residuals = less_pc)
@@ -311,8 +322,11 @@ coexpr_analysis <- function(counts, replicates) {
   # Calculating PCC and SpQN for COCOLOCUS/COBAIN methods
   means <- stats::setNames(rowMeans(sorted), rownames(sorted))
   corr_og <- corAndSpQN(results$Original,means)
+  message(sprintf("Correlation matrix produced for method 'Original'"))
   corr_mr <- corAndSpQN(results$MeanResiduals, means)
+  message(sprintf("Correlation matrix produced for method 'MeanResiduals'"))
   corr_pc1 <- corAndSpQN(results$PC1Residuals, means)
+  message(sprintf("Correlation matrix produced for method 'PC1Residuals'"))
   
   # Compiling outputs
   # All matrices

@@ -1,4 +1,5 @@
 source("R/packages.R")
+librarian::shelf(RColorBrewer)
 
 # ================= DATA SETUP =================
 dfs <- list(
@@ -23,7 +24,6 @@ corr_list <- list(
   B_subtilis     = do.call(cbind, lapply(dfs$B_subtilis, function(x) x$correlation))
 )
 
-library(RColorBrewer)
 # Colors and method names
 cols <- brewer.pal(6,"Dark2") 
 methods <- colnames(comb_list[[1]])

@@ -5,3 +5,6 @@
 .RDataTmp
 
 results_ignore/
+data/bacillus_counts.csv
+data/BURK_counts.csv
+data/k12_counts.csv
