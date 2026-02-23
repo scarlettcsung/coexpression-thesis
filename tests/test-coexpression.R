@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 # Usage Rscript tests/test-coexpression.R
 
 # Load packages
@@ -53,9 +55,9 @@ rownames(toy_genepairs) <- NULL
 
 message("Testing get_genepairs")
 if (!identical(gp, toy_genepairs)) {
-  message("FAIL: get_genepairs")
+  cat(red("FAIL: get_genepairs"))
 } else {
-  message("PASS: get_genepairs")
+  cat(green("PASS: get_genepairs"))
 }
 
 # test coexpr_analysis(). 

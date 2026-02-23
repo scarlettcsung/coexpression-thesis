@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 # Author: Scarlet (Tsz Ching) Sung
 # Description: 
 #   Main script for co-expression-analysis.
