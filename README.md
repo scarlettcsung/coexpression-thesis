@@ -4,12 +4,12 @@ Co-expression analysis is widely used for gene function inference. Conventional 
 
 ## Folder Descriptions
 - R/ : co-expression analysis script, functions, packages
-- data/ - downloaded data. Raw counts are not included but sourced in raw_counts_sources.txt
-- dependencies/ - packages installed from project
-- evaluation/ - evaluation and plot generation scripts, only to be run from IDE
-- reference/ - reference files
-- results/ - co-expression analysis results
-- tests/ - unit testing
+- data/ : downloaded data. Raw counts are not included but sourced in raw_counts_sources.txt
+- dependencies/ : packages installed from project
+- evaluation/ : evaluation and plot generation scripts, only to be run from IDE
+- reference/ : reference files
+- results/ : co-expression analysis results
+- tests/ : unit testing
 
 ## Usage
 The following files can be run via. command line. 
