@@ -50,9 +50,9 @@ plot_multidataset_collapsed(binned_combined,
 dev.off()
 
 median_summary <- generate_median_table(binned_combined)
-
-# View it in RStudio
 View(median_summary)
+
+
 write.csv(median_summary, 
           "evaluation/coexpression_medians.csv", 
           row.names = FALSE)

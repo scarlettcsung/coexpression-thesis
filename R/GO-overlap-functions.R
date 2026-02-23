@@ -113,8 +113,8 @@ get_process_go_ids <- function(gene_pairs_df, go_df,
 #' 
 #' @param df A data frame where genes of gene pairs are matched to its annotated
 #'    GO-IDs. Columns are described below:
-#'    - gene 1: gene name or locus tag of gene 1 of gene pair
-#'    - gene 2: gene name or locus tag of gene 2 of gene pair
+#'    - gene1: gene name or locus tag of gene 1 of gene pair
+#'    - gene2: gene name or locus tag of gene 2 of gene pair
 #'    - GO_IDs_gene1: GO-IDs annotated to gene 1
 #'    - GO_IDs_gene2: GO-IDs annotated to gene 2
 #'    - correlation: similarity measure of gene pair
@@ -123,7 +123,7 @@ get_process_go_ids <- function(gene_pairs_df, go_df,
 #'
 #' @return A data frame that is identical to "df" input but includes two
 #'    additional columns.
-#'    - GO_overlap: binary values 0 for no overlap, 1 for overlap
+#'    - GO_overlap: binary notation 0 for no overlap, 1 for overlap
 #'    - GO_match_cumulative: cumulative overlap up to row in percentage
 compute_go_overlap <- function(df, sep = ";") {
   

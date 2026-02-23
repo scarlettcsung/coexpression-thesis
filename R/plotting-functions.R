@@ -151,6 +151,8 @@ generate_median_table <- function(combined_df) {
 # ================= GO-ID MATCH PLOTS =================
 #' @description
 #' Makes long data frame including bins for binned overlap plot generation
+#' @note to be merged with KOID match plot function where column names is a 
+#' changeable parameter, as it does the same thing just with different labels
 #' 
 #' @param df A data frame with GO matches
 #' @param num_bins Numeric, number of bins
@@ -192,6 +194,16 @@ binned_dataset <- function(df,num_bins,dataset_mean) {
 }
 
 # ================= KOID MATCH PLOTS =================
+#' @description
+#' Makes long data frame including bins for binned overlap plot generation
+#' @note to be merged with GO-ID match plot function where column names is a 
+#' changeable parameter, as it does the same thing just with different labels
+#' 
+#' @param df A data frame with operon matches
+#' @param num_bins Numeric, number of bins
+#' @param dataset_mean Numeric, mean KO matches for whole dataset
+#'
+#' @return A data frame including bins for binned overlap, used for plots
 binned_dataset_ko <- function(df,num_bins,dataset_mean) {
   comb_overlap <- do.call(cbind, lapply(df, function(x) x$shared_operon))
   colnames(comb_overlap) <- names(df)

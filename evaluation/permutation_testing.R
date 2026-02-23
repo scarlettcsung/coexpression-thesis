@@ -1,10 +1,11 @@
 source("R/packages.R")
 source("R/permutation_testing_functions.R")
 
-df <- readRDS("results/k12_komatches.rds")
+df <- readRDS("results_ignore/k12_komatches.rds")
 
 n_permutations <- 10000
-n_genepairs <- floor(nrow(df$Original) * 0.005)
+n_genepairs <- floor(nrow(df$Original) * 0.005) #subset number of gene pairs
+# cumulative overlap of all gene pairs
 mean_allpairs <- df$Original[nrow(df$Original),"cumulative_shared_pct"]
 
 

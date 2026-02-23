@@ -15,6 +15,9 @@ raw_counts <- raw_counts[order(colnames(raw_counts))]
 counts <- filterLowExpression(raw_counts) #Rows: Gene name, Columns: Conditions
 replicates = 2
 
+# gc to make results more consistent
+# bms are broken in 2 as it can be a bit heavy for memory
+
 gc()
 
 bm1 <- bench::mark(
@@ -41,12 +44,14 @@ bm_gc <- bind_rows(bm1,bm2)
 
 bm_gc
 
+# combine
 bm <- bm_gc %>%
   as_tibble() %>%  # This is the magic line
   filter(!grepl("^gc$", as.character(expression)))
 
 bm
 
+# view mean and sds
 bm %>%
   dplyr::select(expression, time) %>%
   group_by(expression) %>%
@@ -57,6 +62,7 @@ bm %>%
 
 saveRDS(bm,"evaluation/eval_results/comp_benchmark_results.rds")
 
+# Plotting
 plot_data <- bm %>%
   dplyr::select(expression,time) %>%
   unnest(time) %>%
@@ -100,6 +106,8 @@ combined_plot <- p1 + p2 +
 combined_plot
 
 bm <- readRDS("evaluation/eval_results/comp_benchmark_results.rds")
+
+# Friedman test
 
 bm_friedman <- bm %>%
   dplyr::select(expression, time) %>%

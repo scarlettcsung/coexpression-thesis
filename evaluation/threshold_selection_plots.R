@@ -9,9 +9,9 @@ dfs <- list(
 )
 
 # ===================== Setup =====================
-step <- 10  # thinning step
+step <- 10  # thinning step for faster plot production
 
-# Matrices
+# Grab cumulative GO matches
 comb_list <- list(
   B_pseudomallei = do.call(cbind, lapply(dfs$B_pseudomallei, function(x) x$GO_match_cumulative)),
   E_coli         = do.call(cbind, lapply(dfs$E_coli, function(x) x$GO_match_cumulative)),

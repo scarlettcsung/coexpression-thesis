@@ -133,8 +133,10 @@ binned_bac <- ggplot(bac_summary,
 plot_grid(
   barchart, 
   binned_burk + 
+    # reference line, red dashed
     geom_vline(xintercept = floor(nrow(dfs$B_pseudomallei$Original) * 0.005), 
                linetype = "dashed", color = "red", linewidth = 0.5) +
+    # magnifying part before/at elbow
     geom_magnify(from = c(-0.2,300000,-1,22),
                  to = c(420000, 2000000, 4, 24)),
   binned_k12 + 
@@ -156,7 +158,8 @@ plot_grid(
 
 # ================= PLOTTING (ADDITIONAL) =================
 
-# An early version of binned plots. 
+# An early version of binned plots, with all methods separately displayed per dataset
+# Still useful if you want to look at methods separately to see details
 
 combined_burk <- do.call(cbind, lapply(dfs$B_pseudomallei, function(x) x$GO_match_cumulative))
 combined_k12 <- do.call(cbind, lapply(df_list, function(x) x$GO_match_cumulative))
