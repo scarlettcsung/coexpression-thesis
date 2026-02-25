@@ -1,8 +1,8 @@
 source("R/packages.R")
-source("R/plotting_functions.R")
+source("R/plotting-functions.R")
 
 librarian::shelf(
-  scales,magnify,
+  scales,ggmagnify,
   cowplot
 )
 
