@@ -2,7 +2,7 @@ source("R/packages.R")
 source("R/plotting-functions")
 
 librarian::shelf(
-  scales,magnify,
+  scales,ggmagnify,
   cowplot
   )
 
