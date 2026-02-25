@@ -1,6 +1,9 @@
 source("R/packages.R")
 
-ko_matches <- saveRDS(ko_matches,file="results/k12_komatches.rds")
+# To makes cumulative match plots
+
+
+ko_matches <- readRDS(ko_matches,file="results/k12_komatches.rds")
 
 plot_df <- do.call(
   rbind,

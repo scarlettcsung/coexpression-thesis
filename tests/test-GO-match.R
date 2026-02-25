@@ -5,7 +5,8 @@
 suppressMessages(source("R/packages.R"))
 suppressMessages(source("R/GO-overlap-functions.R"))
 
-librarian::shelf(crayon)
+librarian::shelf(crayon,
+                 quiet = TRUE)
 
 # ================= CREATE TEST OBJECTS =================
 go_ref <- data.frame(
@@ -56,9 +57,9 @@ rownames(test_filtered_gp) <- NULL
 
 message("Testing filtered_process_go()")
 if (!identical(filtered, test_filtered_gp)) {
-  cat(red("FAIL: filter_process_go"))
+  cat(red("FAIL: filter_process_go \n"))
 } else {
-  cat(green("PASS: filter_process_go"))
+  cat(green("PASS: filter_process_go \n"))
 }
 
 # test get_process_go_ids()-----------------------------------------------------
@@ -71,7 +72,7 @@ rownames(mapped_gp) <- NULL
 
 message("Testing get_process_go_ids()")
 if (!identical(mapped, mapped_gp)) {
-  cat(red("FAIL: get_process_go_ids"))
+  cat(red("FAIL: get_process_go_ids \n"))
 } else {
-  cat(green("PASS: get_process_go_ids"))
+  cat(green("PASS: get_process_go_ids \n"))
 }

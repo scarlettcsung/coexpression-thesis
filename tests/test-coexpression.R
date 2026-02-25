@@ -55,9 +55,9 @@ rownames(toy_genepairs) <- NULL
 
 message("Testing get_genepairs")
 if (!identical(gp, toy_genepairs)) {
-  cat(red("FAIL: get_genepairs"))
+  cat(red("FAIL: get_genepairs \n"))
 } else {
-  cat(green("PASS: get_genepairs"))
+  cat(green("PASS: get_genepairs \n"))
 }
 
 # test coexpr_analysis(). 

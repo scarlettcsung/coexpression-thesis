@@ -85,6 +85,7 @@ for (nm in names(geneTrees)) {
   plot(dend, main = nm, ylab = "1 - cor", xlab = "", leaflab = "none")
 }
 
+# Returning method names
 names(cluster_results) <- names(geneTrees)
 data.frame(
   n_clusters = sapply(cluster_results, `[[`, "n_clusters")
@@ -107,6 +108,8 @@ gnr_long <- gnr %>%
                 symbol = `Gene Names (primary)`) %>%
   dplyr::filter(locus_tag != "")   # drop empty strings
 
+# Changing to names that are consistent with GO database
+# nm is method names!
 clusters_symbols <- lapply(names(cluster_results), function(nm) {
   
   cluster_vec <- cluster_results[[nm]]$clusters  # vector of cluster assignments
@@ -127,12 +130,14 @@ clusters_symbols <- lapply(names(cluster_results), function(nm) {
 
 names(clusters_symbols) <- names(cluster_results)
 
+# Making "Universe" data frame
 all_genes <- data.frame(
   Gene = geneTrees$Original$labels   
 ) %>%
   left_join(gnr_long, by = c("Gene" = "locus_tag")) %>%
   pull(symbol)
 
+# Run GO-enrichment for each method
 ego_all <- lapply(names(clusters_symbols), function(nm) {
   cl_df <- clusters_symbols[[nm]]
   cl_list <- split(cl_df$symbol, cl_df$Cluster)
@@ -154,6 +159,7 @@ names(ego_all) <- names(clusters_symbols)
 saveRDS(ego_all,"evaluation/k12_ego.rds")
 ego_all <- readRDS("evaluation/k12_ego.rds")
 
+# Simplify terms
 ego_simpl <- lapply(names(ego_all),function(nm) {
   simplified <- simplify(ego_all[[nm]],
                          cutoff=0.07,
@@ -161,25 +167,17 @@ ego_simpl <- lapply(names(ego_all),function(nm) {
                          measure='Wang')
 })
 names(ego_simpl) <- names(ego_all)
-  
-# ego_simpl <- pairwise_termsim(ego_simpl)
-# emapplot(ego_simpl)
 
+# Make into dfs
 ego_df <- lapply(ego_simpl,function(x) as.data.frame(x))
 
 saveRDS(ego_simpl,"evaluation/k12_ego_simpl.rds")
 ego_df <- readRDS("evaluation/k12_ego_simpl.rds")
 ego_df <- as.data.frame(ego_df)
 
-view(ego_df$Original)
-view(ego_df$MeanResiduals)
-view(ego_df$PC1Residuals)
-view(ego_df$CLR)
-view(ego_df$propr)
-view(ego_df$propr_z)
-
 ego_df <- lapply(ego_df,function(x) as.data.frame(x))
 
+# Top terms as representative terms
 ego_top <- lapply(ego_df, function(df) {
   df %>%
     group_by(Cluster) %>%
@@ -187,9 +185,12 @@ ego_top <- lapply(ego_df, function(df) {
     ungroup()
 })
 
+# To view clusters
 viewer <- ego_top$Original
 view(viewer[,c("Cluster","GeneRatio")])
 view(viewer[,c("Cluster","ID","Description","GeneRatio","geneID")])
+
+# Organizing as dataframes
 
 go_lists <- lapply(ego_top, function(df) df$ID)
 names(go_lists) <- names(ego_top)
@@ -220,11 +221,3 @@ go_matrix <- go_matrix %>%
   column_to_rownames(var = "ID")
 
 view(go_matrix)
-
-method <- "propr_z"
-cluster_num <- 1
-clusters <- cluster_results[[method]]$clusters
-
-genes_to_plot <-names(clusters)[clusters == cluster_num]
-genes_to_plot <- genes_to_plot[!is.na(genes_to_plot)]
-mat_subset <- matrices[[method]][genes_to_plot,genes_to_plot]
