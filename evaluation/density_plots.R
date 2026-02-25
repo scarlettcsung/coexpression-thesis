@@ -34,7 +34,7 @@ binned <- list(B_pseudomallei = binned_burk,
                B_subtillis = binned_bac)
 
 binned_combined <- dplyr::bind_rows(binned, .id = "dataset")
-saveRDS(binned_combined, file = "evaluation/binned_combined.rds")
+saveRDS(binned_combined, file = "evaluation/eval_results/binned_combined.rds")
 
 
 png("evaluation/density_coexpression.png", 
