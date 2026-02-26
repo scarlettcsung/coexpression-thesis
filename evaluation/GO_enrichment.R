@@ -13,6 +13,12 @@ BiocManager::install(c("clusterProfiler","AnnotationDbi",
                        "org.EcK12.eg.db","enrichplot",
                        "GO.db"))
 
+library(clusterProfiler)
+library(AnnotationDbi)
+library(org.EcK12.eg.db)
+library(enrichplot)
+library(GO.db)
+
 # ================= DATA SETUP =================
 # Load matrices
 matrices <- readRDS("results_ignore/k12_matrices.rds")
@@ -156,24 +162,36 @@ ego_all <- lapply(names(clusters_symbols), function(nm) {
 
 names(ego_all) <- names(clusters_symbols)
 
-saveRDS(ego_all,"evaluation/k12_ego.rds")
-ego_all <- readRDS("evaluation/k12_ego.rds")
+saveRDS(ego_all,"evaluation/eval_results/clustering/k12_ego.rds")
+ego_all <- readRDS("evaluation/eval_results/clustering/k12_ego.rds")
 
 # Simplify terms
 ego_simpl <- lapply(names(ego_all),function(nm) {
-  simplified <- simplify(ego_all[[nm]],
-                         cutoff=0.07,
-                         by='p.adjust',
-                         measure='Wang')
+  simplified <- clusterProfiler::simplify(ego_all[[nm]],
+                                          cutoff=0.07,
+                                          by='p.adjust', 
+                                          measure='Wang')
 })
+
 names(ego_simpl) <- names(ego_all)
+
+library(patchwork)
+
+# Create a list of plots
+plot_list <- lapply(names(ego_simpl), function(nm) {
+  dotplot(ego_simpl[[nm]], showCategory=1) + ggtitle(nm)
+})
+
+# Display them together
+wrap_plots(plot_list)
+
+
 
 # Make into dfs
 ego_df <- lapply(ego_simpl,function(x) as.data.frame(x))
 
 saveRDS(ego_simpl,"evaluation/k12_ego_simpl.rds")
-ego_df <- readRDS("evaluation/k12_ego_simpl.rds")
-ego_df <- as.data.frame(ego_df)
+ego_df <- readRDS("evaluation/eval_results/clustering/k12_ego_simpl.rds")
 
 ego_df <- lapply(ego_df,function(x) as.data.frame(x))
 

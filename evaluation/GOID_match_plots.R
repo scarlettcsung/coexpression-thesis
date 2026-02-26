@@ -84,8 +84,8 @@ barchart <- ggplot(df_plot,
 
 binned_burk <- ggplot(burk_summary, 
                       aes(x = top_row, y = diff_from_mean, color = method)) +
-  geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
-  labs(# title = "B. pseudomallei",
+  geom_smooth(method = "loess", span = 0.1, se = FALSE, linewidth = .7) +
+  labs(title = "B. pseudomallei",
        x = "n gene pairs", 
        y = y_lab) +
   scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
@@ -103,8 +103,8 @@ binned_burk <- ggplot(burk_summary,
 
 binned_k12 <- ggplot(k12_summary, 
                       aes(x = top_row, y = diff_from_mean, color = method)) +
-  geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
-  labs(# title = "E. coli",
+  geom_smooth(method = "loess", span = 0.1, se = FALSE, linewidth = .7) +
+  labs(title = "E. coli",
        x = "n gene pairs", 
        y = y_lab) +
   scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
@@ -117,8 +117,8 @@ binned_k12 <- ggplot(k12_summary,
 
 binned_bac <- ggplot(bac_summary, 
                       aes(x = top_row, y = diff_from_mean, color = method)) +
-  geom_smooth(method = "loess", span = 0.01, se = FALSE, linewidth = .7) +
-  labs(# title = "B. subtilis",
+  geom_smooth(method = "loess", span = 0.1, se = FALSE, linewidth = .7) +
+  labs(title = "B. subtilis",
        x = "n gene pairs", 
        y = y_lab) +
   scale_x_continuous(labels = scales::label_comma(), # Added commas for readability
