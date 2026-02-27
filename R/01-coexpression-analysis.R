@@ -7,7 +7,7 @@
 #   Saves filtered pairs, similarity matrices, 
 #   and gene pairs sorted by similarity
 # Usage: Rscript R/01-coexpression-analysis.R {input_filepath} {dataset_name}
-#   Example: Rscript 01-coexpression-analysis.R {data/BURK_counts.csv} {burkholderia}
+#   Example: Rscript 01-coexpression-analysis.R data/BURK_counts.csv burkholderia
 #   NOTE: You may also run this script in an IDE. In that case,
 #         remember to change the input file path and data set name!
 
