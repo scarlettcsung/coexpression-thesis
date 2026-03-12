@@ -14,9 +14,6 @@ https://edepot.wur.nl/711344
 - results/ : co-expression analysis results
 - tests/ : unit testing
 
-## Installation
-`git clone https://github.com/scarlettcsung/coexpression-thesis.git`
-
 ## Usage
 The following files can be run via. command line. 
 - R/01-coexpression-analysis.R
